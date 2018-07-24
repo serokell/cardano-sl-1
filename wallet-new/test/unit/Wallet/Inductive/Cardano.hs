@@ -128,9 +128,10 @@ interpretT injIntEx mkWallet EventCallbacks{..} Inductive{..} =
         go (NewestFirst (ic :| ics)) hist w (ApplyBlock b:es) = do
             let w'    = applyBlock w b
                 hist' = kernelEvent hist (ApplyBlock b) w'
-            (b', ic') <- int' hist' ic b
+            ((b', _mEBB), ic') <- int' hist' ic b
             let hist''  = kernelInt hist' ic'
                 indCtxt = InductiveCtxt (fromHistoryD hist'') ic' w'
+            -- TODO: Currently we don't pass the EBB to the wallet. Should we?
             withConfig $ walletApplyBlockT indCtxt accountId b'
             go (NewestFirst (ic' :| ic : ics)) hist'' w' es
         go (NewestFirst (ic :| ics)) hist w (NewPending t:es) = do
